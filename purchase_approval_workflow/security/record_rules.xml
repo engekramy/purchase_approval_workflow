@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ============================================================
+         purchase.approval.matrix — Company isolation
+    ============================================================ -->
+
+    <record id="rule_approval_matrix_company" model="ir.rule">
+        <field name="name">Approval Matrix: Company isolation</field>
+        <field name="model_id" ref="model_purchase_approval_matrix"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+        <field name="groups" eval="[(4, ref('purchase_approval_workflow.group_purchase_approval_user'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="True"/>
+    </record>
+
+    <!-- ============================================================
+         purchase.approval.history — Company isolation (read-only)
+         History records are read by all approval users within their company.
+    ============================================================ -->
+
+    <record id="rule_approval_history_company" model="ir.rule">
+        <field name="name">Approval History: Company isolation</field>
+        <field name="model_id" ref="model_purchase_approval_history"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+        <field name="groups" eval="[(4, ref('purchase_approval_workflow.group_purchase_approval_user'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
+</odoo>

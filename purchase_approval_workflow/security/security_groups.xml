@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<data>
+
+    <!-- ============================================================
+         Privilege record — groups this module's groups under
+         the Supply Chain application category in the Settings UI.
+    ============================================================ -->
+    <record model="res.groups.privilege" id="res_groups_privilege_purchase_approval">
+        <field name="name">Purchase Approval</field>
+        <field name="sequence">36</field>
+        <field name="category_id" ref="base.module_category_supply_chain"/>
+    </record>
+
+    <!-- ============================================================
+         Security Groups — hierarchical: Administrator ⊇ Manager ⊇ User
+    ============================================================ -->
+
+    <!-- Level 1: Purchase Approval User
+         Grants read access to approval data. Can submit orders for approval. -->
+    <record id="group_purchase_approval_user" model="res.groups">
+        <field name="name">User</field>
+        <field name="sequence">10</field>
+        <field name="privilege_id" ref="res_groups_privilege_purchase_approval"/>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+    </record>
+
+    <!-- Level 2: Purchase Approval Manager
+         Can approve and reject purchase orders.
+         Implies Purchase Approval User. -->
+    <record id="group_purchase_approval_manager" model="res.groups">
+        <field name="name">Manager</field>
+        <field name="sequence">20</field>
+        <field name="privilege_id" ref="res_groups_privilege_purchase_approval"/>
+        <field name="implied_ids" eval="[(4, ref('group_purchase_approval_user'))]"/>
+    </record>
+
+    <!-- Level 3: Purchase Approval Administrator
+         Full control: approve any order, configure matrix, bypass restrictions.
+         Implies Purchase Approval Manager. -->
+    <record id="group_purchase_approval_administrator" model="res.groups">
+        <field name="name">Administrator</field>
+        <field name="sequence">30</field>
+        <field name="privilege_id" ref="res_groups_privilege_purchase_approval"/>
+        <field name="implied_ids" eval="[(4, ref('group_purchase_approval_manager'))]"/>
+    </record>
+
+</data>
+</odoo>

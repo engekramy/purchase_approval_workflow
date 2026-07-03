@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ============================================================
+         Extend the Purchase Order form view
+         Inherit: purchase.purchase_order_form
+    ============================================================ -->
+    <record id="view_purchase_order_form_approval" model="ir.ui.view">
+        <field name="name">purchase.order.form.approval</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_form"/>
+        <field name="arch" type="xml">
+
+            <!-- 1. Make approval computed fields available in the view -->
+            <xpath expr="//field[@name='locked']" position="before">
+                <field name="approval_state" invisible="1"/>
+                <field name="approval_workflow_enabled" invisible="1"/>
+                <field name="can_approve" invisible="1"/>
+                <field name="display_state" invisible="1"/>
+                <field name="is_overdue" invisible="1"/>
+                <field name="budget_exceeded" invisible="1"/>
+            </xpath>
+
+            <!-- 2. Replace the native statusbar with our unified display_state -->
+            <xpath expr="//field[@name='state'][@widget='statusbar']" position="replace">
+                <field name="state" invisible="1"/>
+                <field name="display_state"
+                       widget="statusbar"
+                       statusbar_visible="draft,waiting_approval,approved,rejected,purchase"
+                       readonly="1"/>
+            </xpath>
+
+            <!-- 3. Inject workflow ribbons inside <sheet> before the button_box -->
+            <xpath expr="//div[@name='button_box']" position="before">
+                <widget name="web_ribbon"
+                        title="Waiting Approval"
+                        bg_color="text-bg-warning"
+                        invisible="approval_state != 'waiting_approval' or state == 'cancel'"/>
+                <widget name="web_ribbon"
+                        title="Approved"
+                        bg_color="text-bg-success"
+                        invisible="approval_state != 'approved' or state in ('cancel', 'purchase', 'done')"/>
+                <widget name="web_ribbon"
+                        title="Rejected"
+                        bg_color="text-bg-danger"
+                        invisible="approval_state != 'rejected' or state == 'cancel'"/>
+            </xpath>
+
+            <!-- 4. Add approval action buttons before the draft Confirm button -->
+            <xpath expr="//button[@id='draft_confirm']" position="before">
+                <!-- Submit for Approval: visible in draft and after rejection -->
+                <button name="action_submit_for_approval"
+                        string="Submit for Approval"
+                        type="object"
+                        class="btn-primary"
+                        data-hotkey="a"
+                        invisible="not approval_workflow_enabled or state not in ('draft', 'sent') or approval_state not in ('draft', 'rejected')"/>
+
+                <!-- Reset for Editing: lets buyer edit the PO after rejection before resubmitting -->
+                <button name="action_reset_for_editing"
+                        string="Reset for Editing"
+                        type="object"
+                        class="btn-secondary"
+                        invisible="not approval_workflow_enabled or approval_state != 'rejected'"/>
+
+                <!-- Approve: visible only to the current approver -->
+                <button name="action_approve"
+                        string="Approve"
+                        type="object"
+                        class="btn-success"
+                        data-hotkey="v"
+                        invisible="not can_approve or approval_state != 'waiting_approval'"/>
+
+                <!-- Reject: visible only to the current approver -->
+                <button name="action_reject"
+                        string="Reject"
+                        type="object"
+                        class="btn-danger"
+                        data-hotkey="j"
+                        invisible="not can_approve or approval_state != 'waiting_approval'"/>
+            </xpath>
+
+            <!-- 5. Restrict the "draft" Confirm Order button:
+                 Hide it when the workflow is enabled and the order is not yet approved. -->
+            <xpath expr="//button[@id='draft_confirm']" position="attributes">
+                <attribute name="invisible">
+                    state != 'draft' or (approval_workflow_enabled and approval_state not in ('approved',))
+                </attribute>
+            </xpath>
+
+            <!-- 6. Restrict the "sent" Confirm Order button similarly. -->
+            <xpath expr="//button[@id='bid_confirm']" position="attributes">
+                <attribute name="invisible">
+                    state != 'sent' or (approval_workflow_enabled and approval_state not in ('approved',))
+                </attribute>
+            </xpath>
+
+            <!-- 7a. Hide the primary "Send RFQ" button (draft state) while waiting for approval.
+                  The sent-state "Send RFQ" button has no unique non-string selector available,
+                  but it no longer errors because 'state' is whitelisted in _approval_internal_fields(). -->
+            <xpath expr="//button[@name='action_rfq_send'][@class='oe_highlight']" position="attributes">
+                <attribute name="invisible">
+                    state != 'draft' or (approval_workflow_enabled and approval_state == 'waiting_approval')
+                </attribute>
+            </xpath>
+
+            <!-- 7b–7g. Lock all business-content fields once the PO leaves draft/sent:
+                  - waiting_approval : pending internal approval
+                  - approved         : approved but not yet confirmed
+                  - purchase/done/cancel : Odoo's own confirmed/closed states
+                  Managers and Administrators bypass this via the write() guard. -->
+
+            <xpath expr="//field[@name='partner_id'][@widget='res_partner_many2one']" position="attributes">
+                <attribute name="readonly">approval_workflow_enabled and (approval_state in ('waiting_approval', 'approved', 'rejected') or state not in ('draft', 'sent'))</attribute>
+            </xpath>
+
+            <xpath expr="//group/group/field[@name='partner_ref']" position="attributes">
+                <attribute name="readonly">approval_workflow_enabled and (approval_state in ('waiting_approval', 'approved', 'rejected') or state not in ('draft', 'sent'))</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='order_line']" position="attributes">
+                <attribute name="readonly">approval_workflow_enabled and (approval_state in ('waiting_approval', 'approved', 'rejected') or state not in ('draft', 'sent'))</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='currency_id'][@force_save='1']" position="attributes">
+                <attribute name="readonly">state in ('cancel', 'purchase') or (approval_workflow_enabled and approval_state in ('waiting_approval', 'approved', 'rejected'))</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='date_order'][not(@column_invisible)]" position="attributes">
+                <attribute name="readonly">state in ('cancel', 'purchase') or (approval_workflow_enabled and approval_state in ('waiting_approval', 'approved', 'rejected'))</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='date_planned'][@readonly]" position="attributes">
+                <attribute name="readonly">state not in ('draft', 'sent', 'to approve', 'purchase') or (approval_workflow_enabled and approval_state in ('waiting_approval', 'approved', 'rejected'))</attribute>
+            </xpath>
+
+            <!-- 8. Smart button for Approval History -->
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button type="object"
+                        name="action_view_approval_history"
+                        class="oe_stat_button"
+                        icon="fa-check-circle"
+                        invisible="approval_history_count == 0">
+                    <field name="approval_history_count"
+                           widget="statinfo"
+                           string="Approvals"/>
+                </button>
+            </xpath>
+
+            <!-- 9. Approval Information page — added after the last existing page -->
+            <xpath expr="//notebook" position="inside">
+                <page string="Approval Information"
+                      name="approval_info"
+                      invisible="not approval_workflow_enabled">
+                    <group>
+                        <group string="Submission">
+                            <field name="submitted_by" readonly="1"/>
+                            <field name="submitted_date" readonly="1"/>
+                            <field name="approval_urgency"
+                                   widget="radio"
+                                   readonly="approval_state not in ('draft', 'rejected')"
+                                   string="Urgency"/>
+                        </group>
+                        <group string="Current Approver">
+                            <field name="current_approver_id" readonly="1"/>
+                            <field name="current_approval_level" readonly="1"
+                                   string="Approval Level"/>
+                            <field name="current_approval_matrix_id" readonly="1"
+                                   string="Active Rule"/>
+                            <field name="approval_deadline" readonly="1"
+                                   invisible="not approval_deadline"/>
+                            <div class="alert alert-danger mb-0 p-2"
+                                 invisible="not is_overdue"
+                                 style="font-size:12px;">
+                                <i class="fa fa-exclamation-triangle me-1"/>
+                                <strong>Approval SLA overdue.</strong> This order has passed its
+                                approval deadline and is pending escalation.
+                            </div>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Final Approval">
+                            <field name="approved_by" readonly="1"/>
+                            <field name="approved_date" readonly="1"/>
+                        </group>
+                        <group string="Rejection">
+                            <field name="rejected_by" readonly="1"
+                                   invisible="not rejected_by"/>
+                            <field name="rejected_date" readonly="1"
+                                   invisible="not rejected_by"/>
+                        </group>
+                    </group>
+                    <group string="Level Threshold" invisible="not budget_exceeded and not budget_remaining">
+                        <field name="budget_remaining" readonly="1" string="Remaining Under Threshold"
+                               help="How much this order's total is below the current approval level's maximum amount. Negative means the order exceeds the level's threshold."/>
+                        <div class="alert alert-warning mb-0 p-2"
+                             invisible="not budget_exceeded"
+                             style="font-size:12px;">
+                            <i class="fa fa-exclamation-triangle me-1"/>
+                            <strong>Above Level Threshold.</strong> This order exceeds the upper limit
+                            defined for the current approval level. The approver should confirm this
+                            is intentional before approving.
+                        </div>
+                    </group>
+
+                    <group string="Notes">
+                        <field name="approval_notes"
+                               nolabel="1"
+                               placeholder="Internal approval notes..."
+                               readonly="approval_state not in ('draft', 'waiting_approval')"/>
+                    </group>
+                </page>
+
+                <page string="Approval History"
+                      name="approval_history"
+                      invisible="not approval_workflow_enabled or approval_history_count == 0">
+                    <field name="approval_history_ids"
+                           nolabel="1"
+                           readonly="1">
+                        <list create="false" edit="false" delete="false"
+                              decoration-success="decision == 'approved'"
+                              decoration-danger="decision == 'rejected'">
+                            <field name="approval_level" string="Level"/>
+                            <field name="approver_id" string="Approver"/>
+                            <field name="decision" string="Decision"
+                                   widget="badge"
+                                   decoration-success="decision == 'approved'"
+                                   decoration-danger="decision == 'rejected'"/>
+                            <field name="date" string="Date"/>
+                            <field name="notes" string="Notes / Reason"/>
+                            <field name="matrix_id" string="Rule" optional="hide"/>
+                        </list>
+                    </field>
+                </page>
+            </xpath>
+
+        </field>
+    </record>
+
+    <!-- ============================================================
+         Extend the Purchase Order list view to show approval state
+         Inherits: purchase.purchase_order_tree (the main PO list view)
+    ============================================================ -->
+    <record id="view_purchase_order_list_approval" model="ir.ui.view">
+        <field name="name">purchase.order.list.approval</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//list" position="attributes">
+                <attribute name="decoration-warning">approval_state == 'waiting_approval'</attribute>
+            </xpath>
+            <xpath expr="//field[@name='state']" position="after">
+                <field name="approval_state" optional="show" string="Approval"
+                       widget="badge"
+                       decoration-warning="approval_state == 'waiting_approval'"
+                       decoration-success="approval_state == 'approved'"
+                       decoration-danger="approval_state == 'rejected'"/>
+                <field name="approval_deadline" optional="show" string="Approval Deadline"
+                       decoration-danger="is_overdue"/>
+                <field name="is_overdue" column_invisible="1"/>
+                <field name="approval_urgency" optional="show" string="Urgency"
+                       widget="badge"
+                       decoration-warning="approval_urgency == 'urgent'"
+                       decoration-danger="approval_urgency == 'critical'"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_purchase_approval_audit_export_wizard_form" model="ir.ui.view">
+        <field name="name">purchase.approval.audit.export.wizard.form</field>
+        <field name="model">purchase.approval.audit.export.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Export Approval Audit Trail">
+                <group>
+                    <group string="Date Range">
+                        <field name="date_from"/>
+                        <field name="date_to"/>
+                    </group>
+                    <group string="Additional Filters">
+                        <field name="purchase_order_id"/>
+                        <field name="approver_id"/>
+                        <field name="decision"/>
+                    </group>
+                </group>
+                <group>
+                    <group string="Export Options">
+                        <field name="export_format" widget="radio"/>
+                    </group>
+                    <group string="Preview">
+                        <field name="record_count" readonly="1"/>
+                    </group>
+                </group>
+                <div class="alert alert-info" style="font-size:12px;">
+                    <i class="fa fa-info-circle me-1"/>
+                    Leave all filters empty to export the <strong>complete</strong> audit trail.
+                    The Excel export includes formatted columns and colour-coded decisions.
+                    The PDF report uses your company branding and is suitable for printing or archiving.
+                </div>
+                <footer>
+                    <button string="Export" name="action_export" type="object" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_purchase_approval_audit_export_wizard" model="ir.actions.act_window">
+        <field name="name">Export Audit Trail</field>
+        <field name="res_model">purchase.approval.audit.export.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+</odoo>

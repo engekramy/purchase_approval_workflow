@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ============================================================
+         List View
+    ============================================================ -->
+    <record id="view_purchase_approval_history_list" model="ir.ui.view">
+        <field name="name">purchase.approval.history.list</field>
+        <field name="model">purchase.approval.history</field>
+        <field name="arch" type="xml">
+            <list string="Approval History"
+                  create="false" edit="false" delete="false"
+                  decoration-success="decision == 'approved'"
+                  decoration-danger="decision == 'rejected'">
+                <field name="purchase_order_name" string="PO Reference" optional="show"/>
+                <field name="partner_id" string="Vendor" optional="show"/>
+                <field name="approval_level" string="Level"/>
+                <field name="approver_id" string="Approver"/>
+                <field name="decision" string="Decision" widget="badge"
+                       decoration-success="decision == 'approved'"
+                       decoration-danger="decision == 'rejected'"/>
+                <field name="date" string="Date"/>
+                <field name="amount_total" string="PO Amount" widget="monetary" optional="show"/>
+                <field name="currency_id" column_invisible="True"/>
+                <field name="notes" string="Notes / Reason" optional="show"/>
+                <field name="matrix_id" string="Rule" optional="hide"/>
+                <field name="company_id" groups="base.group_multi_company" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ============================================================
+         Form View (read-only — audit record)
+    ============================================================ -->
+    <record id="view_purchase_approval_history_form" model="ir.ui.view">
+        <field name="name">purchase.approval.history.form</field>
+        <field name="model">purchase.approval.history</field>
+        <field name="arch" type="xml">
+            <form string="Approval History Entry" create="false" edit="false" delete="false">
+                <sheet>
+                    <div class="alert alert-info" role="alert">
+                        <i class="fa fa-lock"/> This is a permanent audit record and cannot be modified or deleted.
+                    </div>
+                    <group>
+                        <group string="Purchase Order">
+                            <field name="purchase_order_id" string="PO Reference"/>
+                            <field name="partner_id"/>
+                            <field name="currency_id" invisible="1"/>
+                            <field name="amount_total" widget="monetary"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                        <group string="Approval Decision">
+                            <field name="approval_level"/>
+                            <field name="approver_id"/>
+                            <field name="decision" widget="badge"
+                                   decoration-success="decision == 'approved'"
+                                   decoration-danger="decision == 'rejected'"/>
+                            <field name="date"/>
+                            <field name="matrix_id"/>
+                        </group>
+                    </group>
+                    <group string="Notes / Reason">
+                        <field name="notes" nolabel="1"
+                               placeholder="No notes provided."/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ============================================================
+         Search View
+    ============================================================ -->
+    <record id="view_purchase_approval_history_search" model="ir.ui.view">
+        <field name="name">purchase.approval.history.search</field>
+        <field name="model">purchase.approval.history</field>
+        <field name="arch" type="xml">
+            <search string="Search Approval History">
+                <field name="purchase_order_name" string="PO Reference"/>
+                <field name="approver_id"/>
+                <field name="partner_id"/>
+                <filter string="Approved" name="approved"
+                        domain="[('decision', '=', 'approved')]"/>
+                <filter string="Rejected" name="rejected"
+                        domain="[('decision', '=', 'rejected')]"/>
+                <separator/>
+                <filter string="This Month" name="this_month" date="date"/>
+                <group>
+                    <filter string="Approver" name="group_approver"
+                            domain="[]" context="{'group_by': 'approver_id'}"/>
+                    <filter string="Decision" name="group_decision"
+                            domain="[]" context="{'group_by': 'decision'}"/>
+                    <filter string="PO Reference" name="group_po"
+                            domain="[]" context="{'group_by': 'purchase_order_id'}"/>
+                    <filter string="Month" name="group_month"
+                            domain="[]" context="{'group_by': 'date:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ============================================================
+         Window Action
+    ============================================================ -->
+    <record id="action_purchase_approval_history" model="ir.actions.act_window">
+        <field name="name">Approval History</field>
+        <field name="res_model">purchase.approval.history</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_purchase_approval_history_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No approval decisions recorded yet.
+            </p>
+            <p>
+                Approval decisions will appear here once purchase orders
+                are submitted for approval.
+            </p>
+        </field>
+    </record>
+
+</odoo>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Add Trusted Vendor bypass fields to the partner purchase section -->
+    <record id="view_res_partner_approval_bypass" model="ir.ui.view">
+        <field name="name">res.partner.approval.bypass</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//group[@name='purchase']" position="inside">
+                <field name="approval_bypass"
+                       string="Trusted Vendor (Skip Approval)"
+                       widget="boolean_toggle"
+                       help="When enabled, purchase orders from this vendor bypass the normal approval workflow."/>
+                <field name="approval_bypass_limit"
+                       string="Bypass Limit"
+                       widget="monetary"
+                       invisible="not approval_bypass"
+                       help="Orders above this amount still require normal approval. 0.00 = no limit."/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

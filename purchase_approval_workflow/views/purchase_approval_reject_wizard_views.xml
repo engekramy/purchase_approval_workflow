@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_purchase_approval_reject_wizard_form" model="ir.ui.view">
+        <field name="name">purchase.approval.reject.wizard.form</field>
+        <field name="model">purchase.approval.reject.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Reject Purchase Order">
+                <div class="alert alert-warning" role="alert">
+                    <strong>Warning:</strong> You are about to reject this Purchase Order.
+                    The order will be returned to <strong>Draft</strong> status and the
+                    buyer will be notified. This action is permanently recorded.
+                </div>
+                <group string="Order Summary">
+                    <field name="purchase_order_id" readonly="1"/>
+                    <field name="partner_id" readonly="1"/>
+                    <field name="currency_id" invisible="1"/>
+                    <field name="amount_total" widget="monetary" readonly="1"/>
+                    <field name="current_level" readonly="1"
+                           string="Being Rejected at Level"/>
+                </group>
+                <group string="Rejection Reason">
+                    <field name="reason"
+                           nolabel="1"
+                           placeholder="Please provide a clear reason for rejection. This will be recorded in the approval history and sent to the buyer..."
+                           required="1"
+                           widget="text"/>
+                </group>
+                <footer>
+                    <button name="action_confirm_rejection"
+                            string="Confirm Rejection"
+                            type="object"
+                            class="btn-danger"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+</odoo>

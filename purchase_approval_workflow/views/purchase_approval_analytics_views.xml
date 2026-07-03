@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ============================================================
+         Approval Analytics — pivot + graph views on approval history
+    ============================================================ -->
+
+    <record id="view_purchase_approval_history_pivot" model="ir.ui.view">
+        <field name="name">purchase.approval.history.pivot</field>
+        <field name="model">purchase.approval.history</field>
+        <field name="arch" type="xml">
+            <pivot string="Approval Analytics" sample="1">
+                <field name="approver_id" type="row"/>
+                <field name="decision" type="col"/>
+                <field name="approval_level" type="col"/>
+                <field name="id" type="measure" string="Count"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="view_purchase_approval_history_graph" model="ir.ui.view">
+        <field name="name">purchase.approval.history.graph</field>
+        <field name="model">purchase.approval.history</field>
+        <field name="arch" type="xml">
+            <graph string="Approval Decisions" type="bar" stacked="1" sample="1">
+                <field name="approver_id"/>
+                <field name="decision" type="col"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="view_purchase_approval_history_graph_trend" model="ir.ui.view">
+        <field name="name">purchase.approval.history.graph.trend</field>
+        <field name="model">purchase.approval.history</field>
+        <field name="arch" type="xml">
+            <graph string="Approval Trend" type="line" sample="1">
+                <field name="date" interval="week"/>
+                <field name="decision" type="col"/>
+            </graph>
+        </field>
+    </record>
+
+    <!-- Analytics action with pivot + graph + list -->
+    <record id="action_purchase_approval_analytics" model="ir.actions.act_window">
+        <field name="name">Approval Analytics</field>
+        <field name="res_model">purchase.approval.history</field>
+        <field name="view_mode">graph,pivot,list</field>
+        <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'view_mode': 'graph', 'view_id': ref('view_purchase_approval_history_graph')}),
+            (0, 0, {'view_mode': 'pivot', 'view_id': ref('view_purchase_approval_history_pivot')})]"/>
+        <field name="context">{'search_default_group_by_decision': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No approval data yet.
+            </p>
+            <p>
+                Approval history records will appear here as purchase orders are submitted,
+                approved, and rejected. Use the filters to analyse by approver, level, or date.
+            </p>
+        </field>
+    </record>
+
+</odoo>

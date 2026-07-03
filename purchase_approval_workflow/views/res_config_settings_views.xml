@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!--
+        Inherit the purchase settings view and inject a new block
+        for the Purchase Approval Workflow settings.
+    -->
+    <record id="res_config_settings_view_form_purchase_approval" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.purchase.approval</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="purchase.res_config_settings_view_form_purchase"/>
+        <field name="arch" type="xml">
+
+            <!-- Add our settings block after the Products block (last in purchase settings) -->
+            <xpath expr="//block[@name='matrix_setting_container']" position="after">
+
+                <block title="Purchase Approval Workflow" name="purchase_approval_workflow_container">
+
+                    <setting id="purchase_approval_enabled"
+                             help="Require approval before RFQs can be confirmed as Purchase Orders.">
+                        <field name="purchase_approval_enabled"
+                               string="Enable Purchase Approval Workflow"/>
+                    </setting>
+
+                    <setting id="purchase_approval_multi_level"
+                             help="Support multiple sequential approval levels (Supervisor → Manager → Director)."
+                             invisible="not purchase_approval_enabled">
+                        <field name="purchase_approval_multi_level"
+                               string="Enable Multi-Level Approval"/>
+                    </setting>
+
+                    <setting id="purchase_approval_email_notifications"
+                             help="Send email notifications to approvers and buyers at each workflow step."
+                             invisible="not purchase_approval_enabled">
+                        <field name="purchase_approval_email_notifications"
+                               string="Enable Email Notifications"/>
+                    </setting>
+
+                    <setting id="purchase_approval_mail_activities"
+                             help="Create a scheduled activity for the approver when a PO is submitted."
+                             invisible="not purchase_approval_enabled">
+                        <field name="purchase_approval_mail_activities"
+                               string="Enable Mail Activities"/>
+                    </setting>
+
+                    <setting id="purchase_approval_manager_override"
+                             help="Allow Purchase Approval Managers to approve any order, even if not designated as the approver in the matrix."
+                             invisible="not purchase_approval_enabled">
+                        <field name="purchase_approval_manager_override"
+                               string="Allow Manager Override"/>
+                    </setting>
+
+                    <setting id="purchase_approval_auto_confirm"
+                             help="Automatically confirm the PO immediately after the final approval is granted."
+                             invisible="not purchase_approval_enabled">
+                        <field name="purchase_approval_auto_confirm"
+                               string="Auto-Confirm After Final Approval"/>
+                    </setting>
+
+                    <setting id="purchase_approval_sla_enabled"
+                             help="Each approval matrix rule can define a deadline (in days). A daily cron job sends reminder emails and reassigns overdue approvals to the escalation user."
+                             invisible="not purchase_approval_enabled">
+                        <field name="purchase_approval_sla_enabled"
+                               string="Enable Approval SLA &amp; Escalation"/>
+                    </setting>
+
+                    <setting id="purchase_approval_trusted_vendor_bypass"
+                             help="Purchase orders from vendors marked as 'Trusted' are automatically approved without requiring manual review."
+                             invisible="not purchase_approval_enabled">
+                        <field name="purchase_approval_trusted_vendor_bypass"
+                               string="Enable Trusted Vendor Bypass"/>
+                    </setting>
+
+                    <setting id="purchase_approval_budget_check"
+                             help="Display remaining analytic budget on the PO during approval and warn the approver if the budget is exceeded. Requires the Budget Management module."
+                             invisible="not purchase_approval_enabled">
+                        <field name="purchase_approval_budget_check"
+                               string="Enable Budget Check on Approval"/>
+                    </setting>
+
+                    <setting invisible="not purchase_approval_enabled">
+                        <div class="mt8">
+                            <button name="%(purchase_approval_workflow.action_purchase_approval_matrix)d"
+                                    icon="oi-arrow-right"
+                                    type="action"
+                                    string="Configure Approval Matrix"
+                                    class="btn-link"/>
+                        </div>
+                    </setting>
+
+                </block>
+
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

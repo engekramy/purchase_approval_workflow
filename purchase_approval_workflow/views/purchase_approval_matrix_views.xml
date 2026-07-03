@@ -1,0 +1,317 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ============================================================
+         List View  (drag-to-reorder by sequence is the handle widget)
+    ============================================================ -->
+    <record id="view_purchase_approval_matrix_list" model="ir.ui.view">
+        <field name="name">purchase.approval.matrix.list</field>
+        <field name="model">purchase.approval.matrix</field>
+        <field name="arch" type="xml">
+            <list string="Approval Matrix"
+                  decoration-muted="not active"
+                  decoration-info="approval_level == 1"
+                  decoration-success="approval_level == 2"
+                  decoration-warning="approval_level == 3">
+
+                <!-- drag handle – works because model _order = 'sequence asc' -->
+                <field name="sequence" widget="handle"/>
+
+                <!-- level_selection renders as a compact dropdown in edit mode -->
+                <field name="level_selection" string="Level"
+                       decoration-info="level_selection == '1'"
+                       decoration-success="level_selection == '2'"
+                       decoration-warning="level_selection == '3'"
+                       decoration-danger="level_selection in ('4','5','6','7','8','9','10')"/>
+                <field name="approval_level" column_invisible="1"/>
+
+                <field name="name"/>
+
+                <field name="approver_user_id" optional="show" string="Approver (User)"/>
+                <field name="approver_group_id" optional="show" string="Approver (Group)"/>
+
+                <field name="min_amount" optional="show" string="Min Amount"/>
+                <field name="max_amount" optional="show" string="Max Amount"/>
+                <field name="currency_id" optional="hide"/>
+
+                <field name="department_id" optional="show"/>
+                <field name="product_category_id" optional="show"/>
+
+                <field name="vendor_id" optional="show" string="Vendor"/>
+                <field name="sla_days" optional="show" string="Deadline (Days)"/>
+                <field name="escalate_to_id" optional="show" string="Escalate To"/>
+
+                <field name="company_id"
+                       groups="base.group_multi_company"
+                       optional="show"/>
+
+                <field name="active" widget="boolean_toggle" optional="show"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ============================================================
+         Kanban View  – columns by approval level, drag card to change level
+    ============================================================ -->
+    <record id="view_purchase_approval_matrix_kanban" model="ir.ui.view">
+        <field name="name">purchase.approval.matrix.kanban</field>
+        <field name="model">purchase.approval.matrix</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="approval_level"
+                    group_create="false"
+                    group_delete="false"
+                    class="o_kanban_small_column">
+
+                <!-- fields needed in the card template -->
+                <field name="id"/>
+                <field name="name"/>
+                <field name="approval_level"/>
+                <field name="level_color"/>
+                <field name="sequence"/>
+                <field name="min_amount"/>
+                <field name="max_amount"/>
+                <field name="currency_id"/>
+                <field name="approver_user_id"/>
+                <field name="approver_group_id"/>
+                <field name="department_id"/>
+                <field name="product_category_id"/>
+                <field name="active"/>
+                <field name="company_id"/>
+
+                <templates>
+                    <t t-name="card">
+
+                        <!-- Level badge + active toggle -->
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="badge fw-semibold"
+                                  t-attf-style="background:#{record.level_color.value};
+                                                color:white;font-size:10px;letter-spacing:.5px;">
+                                LEVEL&#160;<t t-out="record.approval_level.value"/>
+                            </span>
+                            <field name="active" widget="boolean_toggle"/>
+                        </div>
+
+                        <!-- Rule name -->
+                        <div class="fw-bold mb-2" style="font-size:13px;color:#212529;">
+                            <field name="name"/>
+                        </div>
+
+                        <!-- Approver -->
+                        <div class="d-flex align-items-center gap-1 small text-muted mb-1">
+                            <t t-if="record.approver_user_id.raw_value">
+                                <i class="fa fa-user-o"
+                                   t-attf-style="color:#{record.level_color.value};"/>
+                                <field name="approver_user_id" class="fw-semibold text-dark"/>
+                            </t>
+                            <t t-elif="record.approver_group_id.raw_value">
+                                <i class="fa fa-users"
+                                   t-attf-style="color:#{record.level_color.value};"/>
+                                <field name="approver_group_id" class="fw-semibold text-dark"/>
+                            </t>
+                            <t t-else="">
+                                <i class="fa fa-exclamation-triangle text-warning"/>
+                                <span class="text-warning">No approver set</span>
+                            </t>
+                        </div>
+
+                        <!-- Amount range -->
+                        <div class="d-flex align-items-center gap-1 small text-muted mb-1"
+                             t-if="record.min_amount.raw_value or record.max_amount.raw_value">
+                            <i class="fa fa-money text-success"/>
+                            <t t-if="record.min_amount.raw_value and record.max_amount.raw_value">
+                                <field name="min_amount"/>&#160;&#8211;&#160;<field name="max_amount"/>
+                            </t>
+                            <t t-elif="record.min_amount.raw_value">
+                                Above&#160;<field name="min_amount"/>
+                            </t>
+                            <t t-else="">
+                                Up to&#160;<field name="max_amount"/>
+                            </t>
+                        </div>
+                        <div class="small text-muted mb-1"
+                             t-if="!record.min_amount.raw_value and !record.max_amount.raw_value">
+                            <i class="fa fa-money text-success me-1"/>Any amount
+                        </div>
+
+                        <!-- Optional filters as pills -->
+                        <div class="mt-2 d-flex flex-wrap gap-1">
+                            <span t-if="record.department_id.raw_value"
+                                  class="badge bg-light text-dark border"
+                                  style="font-size:10px;">
+                                <i class="fa fa-building-o me-1"/>
+                                <field name="department_id"/>
+                            </span>
+                            <span t-if="record.product_category_id.raw_value"
+                                  class="badge bg-light text-dark border"
+                                  style="font-size:10px;">
+                                <i class="fa fa-tag me-1"/>
+                                <field name="product_category_id"/>
+                            </span>
+                            <span t-if="record.company_id.raw_value"
+                                  class="badge bg-light text-dark border"
+                                  style="font-size:10px;"
+                                  groups="base.group_multi_company">
+                                <i class="fa fa-globe me-1"/>
+                                <field name="company_id"/>
+                            </span>
+                        </div>
+
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- ============================================================
+         Form View
+    ============================================================ -->
+    <record id="view_purchase_approval_matrix_form" model="ir.ui.view">
+        <field name="name">purchase.approval.matrix.form</field>
+        <field name="model">purchase.approval.matrix</field>
+        <field name="arch" type="xml">
+            <form string="Approval Rule">
+                <sheet>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger"
+                            invisible="active"/>
+
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1>
+                            <field name="name"
+                                   placeholder="e.g. Supervisor — Up to 5,000"/>
+                        </h1>
+                        <field name="approval_level" invisible="1"/>
+                        <field name="level_color"    invisible="1"/>
+                    </div>
+
+                    <group>
+                        <group string="Approval Level">
+                            <field name="level_selection" string="Level" nolabel="1"/>
+                        </group>
+                    </group>
+
+                    <group>
+                        <group string="Rule Settings">
+                            <field name="company_id"
+                                   groups="base.group_multi_company"/>
+                            <field name="active"/>
+                            <field name="sequence"
+                                   help="Lower number wins when multiple rules match the same level. Drag the row in the list view to reorder."/>
+                        </group>
+                        <group string="Amount Range"
+                               help="Leave both at 0.00 to match any order amount.">
+                            <field name="currency_id" invisible="1"/>
+                            <field name="min_amount" widget="monetary"
+                                   help="Minimum PO total (company currency). 0 = no lower limit."/>
+                            <field name="max_amount" widget="monetary"
+                                   help="Maximum PO total (company currency). 0 = no upper limit."/>
+                        </group>
+                    </group>
+
+                    <group>
+                        <group string="Approver">
+                            <field name="use_hr_manager"
+                                   widget="boolean_toggle"
+                                   string="Route to Buyer's HR Manager"
+                                   help="Automatically assign approval to the HR manager of the employee who created the PO."/>
+                            <field name="approver_user_id"
+                                   invisible="use_hr_manager"
+                                   help="This specific user must approve. Takes priority over the group if both are set."/>
+                            <field name="approver_group_id"
+                                   invisible="use_hr_manager"
+                                   help="Any active member of this group can approve when no specific user is assigned."/>
+                            <field name="approval_type"
+                                   widget="radio"
+                                   invisible="use_hr_manager"
+                                   help="'Any One (OR)' — the first group member to approve advances the workflow. 'All Members (AND)' — every active group member must approve. Requires an Approver Group to be set."/>
+                        </group>
+                        <group string="Optional Filters"
+                               help="Leave empty to match all orders at this level.">
+                            <field name="vendor_id"
+                                   help="Restrict this rule to orders from a specific vendor."/>
+                            <field name="department_id"
+                                   help="Restrict this rule to orders raised by employees in this department."/>
+                            <field name="product_category_id"
+                                   help="Restrict to orders containing products in this category (or any child category)."/>
+                        </group>
+                    </group>
+
+                    <group>
+                        <group string="SLA &amp; Escalation">
+                            <field name="sla_days"
+                                   string="Deadline (Days)"
+                                   help="Calendar days allowed for this level. 0 = no deadline."/>
+                            <field name="escalate_to_id"
+                                   help="If the deadline passes, this user is notified and becomes the active approver."/>
+                        </group>
+                    </group>
+
+                    <group>
+                        <field name="notes"
+                               placeholder="Internal notes about this rule..."/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ============================================================
+         Search View
+    ============================================================ -->
+    <record id="view_purchase_approval_matrix_search" model="ir.ui.view">
+        <field name="name">purchase.approval.matrix.search</field>
+        <field name="model">purchase.approval.matrix</field>
+        <field name="arch" type="xml">
+            <search string="Search Approval Rules">
+                <field name="name" string="Rule Name"/>
+                <field name="approver_user_id" string="Approver"/>
+                <field name="department_id"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+                <filter string="Active" name="active"
+                        domain="[('active', '=', True)]"/>
+                <filter string="Archived" name="archived"
+                        domain="[('active', '=', False)]"/>
+                <separator/>
+                <filter string="Level 1" name="level_1"
+                        domain="[('approval_level', '=', 1)]"/>
+                <filter string="Level 2" name="level_2"
+                        domain="[('approval_level', '=', 2)]"/>
+                <filter string="Level 3+" name="level_3"
+                        domain="[('approval_level', '>=', 3)]"/>
+                <group>
+                    <filter string="Approval Level" name="group_level"
+                            domain="[]"
+                            context="{'group_by': 'approval_level'}"/>
+                    <filter string="Company" name="group_company"
+                            domain="[]"
+                            context="{'group_by': 'company_id'}"/>
+                    <filter string="Approver" name="group_approver"
+                            domain="[]"
+                            context="{'group_by': 'approver_user_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ============================================================
+         Window Action  – list + kanban + form
+    ============================================================ -->
+    <record id="action_purchase_approval_matrix" model="ir.actions.act_window">
+        <field name="name">Approval Matrix</field>
+        <field name="res_model">purchase.approval.matrix</field>
+        <field name="view_mode">list,kanban,form</field>
+        <field name="search_view_id" ref="view_purchase_approval_matrix_search"/>
+        <field name="context">{'search_default_active': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No approval rules configured yet.
+            </p>
+            <p>
+                Create approval rules to define who must approve purchase orders
+                based on amount, department, or product category.
+                Switch to the <b>Kanban</b> view to drag rules between levels visually.
+            </p>
+        </field>
+    </record>
+
+</odoo>

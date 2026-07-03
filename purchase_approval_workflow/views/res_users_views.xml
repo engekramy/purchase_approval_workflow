@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Extend the admin user form — Preferences tab -->
+    <record id="view_res_users_approval_delegation" model="ir.ui.view">
+        <field name="name">res.users.approval.delegation</field>
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="base.view_users_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='preferences']//group[@name='other_preferences']" position="after">
+                <group string="Purchase Approval Delegation" name="approval_delegation">
+                    <field name="approval_delegate_id"
+                           string="Delegate Approvals To"
+                           help="When set, new approval requests will be routed to this person while you are away."/>
+                    <field name="approval_delegate_until"
+                           string="Delegate Until"
+                           help="Delegation is active until this date. Leave empty for indefinite delegation."/>
+                    <field name="is_on_approval_leave"
+                           string="Currently Delegating"
+                           readonly="1"
+                           invisible="not approval_delegate_id"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Extend the user preferences dialog (self-service) -->
+    <record id="view_res_users_approval_delegation_simple" model="ir.ui.view">
+        <field name="name">res.users.approval.delegation.simple</field>
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="base.view_users_form_simple_modif"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='preferences_page']//group[@name='other_preferences']" position="after">
+                <group string="Purchase Approval Delegation" name="approval_delegation">
+                    <field name="approval_delegate_id"
+                           string="Delegate Approvals To"
+                           help="Route your pending approval requests to this person while you are away."/>
+                    <field name="approval_delegate_until"
+                           string="Delegate Until"
+                           help="Leave empty for indefinite delegation."/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

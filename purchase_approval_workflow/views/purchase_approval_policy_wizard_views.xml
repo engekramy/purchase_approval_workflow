@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_purchase_approval_policy_wizard_form" model="ir.ui.view">
+        <field name="name">purchase.approval.policy.wizard.form</field>
+        <field name="model">purchase.approval.policy.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Apply Approval Policy Template">
+                <group>
+                    <group string="Template">
+                        <field name="policy_type" widget="radio"/>
+                    </group>
+                    <group string="Options">
+                        <field name="company_id" groups="base.group_multi_company"/>
+                        <field name="clear_existing"/>
+                    </group>
+                </group>
+                <div class="alert alert-info" style="font-size:12px;">
+                    <i class="fa fa-info-circle me-1"/>
+                    The template creates placeholder rules with <strong>your user as approver</strong>.
+                    After applying, go to <em>Approvals Workflow → Approval Matrix</em> and assign
+                    the correct approvers and amount ranges for each rule.
+                </div>
+                <footer>
+                    <button string="Apply Template" name="action_apply" type="object" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_purchase_approval_policy_wizard" model="ir.actions.act_window">
+        <field name="name">Apply Policy Template</field>
+        <field name="res_model">purchase.approval.policy.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+</odoo>

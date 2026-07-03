@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Purchase Approval Workflow — Odoo 19</title>
+<style>
+  /* ── Reset ─────────────────────────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; color: #2c3e50; background: #fff; line-height: 1.6; }
+  a { color: #e67e22; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  img { max-width: 100%; height: auto; display: block; border-radius: 6px; }
+
+  /* ── Layout ─────────────────────────────────────────── */
+  .container { max-width: 960px; margin: 0 auto; padding: 0 24px; }
+  section { padding: 52px 0; }
+  section:nth-child(even) { background: #f8f9fb; }
+
+  /* ── Hero ─────────────────────────────────────────── */
+  .hero {
+    background: linear-gradient(135deg, #1a2332 0%, #2c3e50 55%, #34495e 100%);
+    color: #fff;
+    padding: 64px 0 52px;
+    text-align: center;
+  }
+  .hero-logo {
+    width: 80px; height: 80px;
+    background: #e67e22;
+    border-radius: 18px;
+    margin: 0 auto 24px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 40px;
+    box-shadow: 0 4px 20px rgba(0,0,0,.35);
+  }
+  .hero h1 {
+    font-size: 36px; font-weight: 700; margin-bottom: 12px;
+    letter-spacing: -0.5px;
+  }
+  .hero h1 span { color: #e67e22; }
+  .hero-sub {
+    font-size: 18px; color: #b2bec3; max-width: 580px;
+    margin: 0 auto 28px;
+  }
+  .badge-row { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 32px; }
+  .badge {
+    display: inline-block; padding: 5px 16px; border-radius: 20px;
+    font-size: 13px; font-weight: 600; letter-spacing: .3px;
+  }
+  .badge-orange  { background: #e67e22; color: #fff; }
+  .badge-green   { background: #27ae60; color: #fff; }
+  .badge-blue    { background: #2980b9; color: #fff; }
+  .badge-outline { border: 1px solid rgba(255,255,255,.4); color: #fff; }
+  .hero-stats {
+    display: flex; justify-content: center; gap: 40px; flex-wrap: wrap;
+    margin-top: 12px;
+  }
+  .hero-stat { text-align: center; }
+  .hero-stat-num { font-size: 32px; font-weight: 800; color: #e67e22; }
+  .hero-stat-lbl { font-size: 13px; color: #95a5a6; text-transform: uppercase; letter-spacing: .5px; }
+
+  /* ── Value props ─────────────────────────────────── */
+  .props-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+  .prop-card {
+    background: #fff; border-radius: 12px; padding: 28px 24px;
+    box-shadow: 0 2px 12px rgba(0,0,0,.07); text-align: center;
+  }
+  .prop-icon { font-size: 40px; margin-bottom: 14px; }
+  .prop-card h3 { font-size: 17px; font-weight: 700; margin-bottom: 8px; color: #1a2332; }
+  .prop-card p { font-size: 14px; color: #636e72; }
+
+  /* ── Section titles ──────────────────────────────── */
+  .section-title {
+    text-align: center; margin-bottom: 36px;
+  }
+  .section-title h2 {
+    font-size: 28px; font-weight: 700; color: #1a2332; margin-bottom: 8px;
+  }
+  .section-title p { color: #636e72; max-width: 540px; margin: 0 auto; }
+  .section-title .accent-line {
+    width: 48px; height: 4px; background: #e67e22;
+    border-radius: 2px; margin: 12px auto 0;
+  }
+
+  /* ── Feature grid ────────────────────────────────── */
+  .features-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+  .feature-card {
+    background: #fff; border-radius: 10px; padding: 22px 20px;
+    border: 1px solid #e8ecef;
+    display: flex; align-items: flex-start; gap: 16px;
+    transition: box-shadow .2s, transform .2s;
+  }
+  .feature-card:hover { box-shadow: 0 4px 18px rgba(0,0,0,.1); transform: translateY(-2px); }
+  .feature-num {
+    flex-shrink: 0; width: 36px; height: 36px; border-radius: 50%;
+    background: #e67e22; color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 700;
+  }
+  .feature-body h4 { font-size: 15px; font-weight: 700; color: #1a2332; margin-bottom: 4px; }
+  .feature-body p  { font-size: 13px; color: #636e72; line-height: 1.5; }
+  .feature-tag {
+    display: inline-block; font-size: 11px; font-weight: 600;
+    padding: 2px 8px; border-radius: 10px; margin-top: 6px;
+    background: #fef9f0; color: #e67e22; border: 1px solid #f5c98a;
+  }
+
+  /* ── Screenshots ─────────────────────────────────── */
+  .screenshots-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+  }
+  .screenshot-item { position: relative; overflow: hidden; border-radius: 8px; }
+  .screenshot-item img {
+    width: 100%; border-radius: 8px;
+    border: 1px solid #e0e4ea;
+    transition: transform .3s;
+  }
+  .screenshot-item:hover img { transform: scale(1.03); }
+  .screenshot-caption {
+    text-align: center; font-size: 12px; color: #888;
+    margin-top: 6px;
+  }
+
+  /* ── How it works ────────────────────────────────── */
+  .steps { display: flex; align-items: flex-start; gap: 0; position: relative; }
+  .steps::before {
+    content: '';
+    position: absolute; top: 28px; left: 56px; right: 56px; height: 2px;
+    background: #e8ecef; z-index: 0;
+  }
+  .step { flex: 1; text-align: center; position: relative; z-index: 1; padding: 0 12px; }
+  .step-circle {
+    width: 56px; height: 56px; border-radius: 50%;
+    background: #e67e22; color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; margin: 0 auto 14px;
+    box-shadow: 0 3px 12px rgba(230,126,34,.4);
+  }
+  .step h4 { font-size: 14px; font-weight: 700; color: #1a2332; margin-bottom: 6px; }
+  .step p  { font-size: 13px; color: #636e72; }
+
+  /* ── Security ────────────────────────────────────── */
+  .security-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .security-card {
+    background: #fff; border-radius: 10px; padding: 22px 18px;
+    border-left: 4px solid #e67e22; box-shadow: 0 2px 8px rgba(0,0,0,.05);
+  }
+  .security-card h4 { font-size: 14px; font-weight: 700; color: #1a2332; margin-bottom: 6px; }
+  .security-card p  { font-size: 13px; color: #636e72; }
+  .security-icon { font-size: 24px; margin-bottom: 10px; }
+
+  /* ── Specs table ─────────────────────────────────── */
+  .specs-table { width: 100%; border-collapse: collapse; }
+  .specs-table th, .specs-table td {
+    padding: 12px 16px; text-align: left;
+    border-bottom: 1px solid #e8ecef; font-size: 14px;
+  }
+  .specs-table th { background: #f0f2f5; font-weight: 700; color: #1a2332; width: 30%; }
+  .specs-table td { color: #444; }
+  .specs-table tr:last-child th,
+  .specs-table tr:last-child td { border-bottom: none; }
+
+  /* ── Changelog ───────────────────────────────────── */
+  .changelog { list-style: none; }
+  .changelog li { padding: 10px 0; border-bottom: 1px solid #f0f2f5; font-size: 14px; color: #444; display: flex; gap: 12px; }
+  .changelog li:last-child { border-bottom: none; }
+  .cl-ver { font-weight: 700; color: #e67e22; min-width: 110px; }
+
+  /* ── Support / CTA ───────────────────────────────── */
+  .support-section {
+    background: linear-gradient(135deg, #1a2332, #2c3e50);
+    color: #fff; text-align: center; padding: 52px 0;
+  }
+  .support-section h2 { font-size: 26px; margin-bottom: 10px; }
+  .support-section p  { color: #b2bec3; margin-bottom: 28px; }
+  .support-links { display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; }
+  .support-btn {
+    display: inline-block; padding: 12px 28px; border-radius: 6px;
+    font-size: 14px; font-weight: 700; letter-spacing: .3px;
+  }
+  .support-btn-primary { background: #e67e22; color: #fff; }
+  .support-btn-outline { border: 2px solid rgba(255,255,255,.4); color: #fff; }
+  .support-btn:hover { opacity: .9; text-decoration: none; }
+
+  /* ── Footer ──────────────────────────────────────── */
+  .footer {
+    background: #111820; color: #636e72;
+    text-align: center; padding: 24px;
+    font-size: 13px;
+  }
+  .footer strong { color: #e67e22; }
+
+  /* ── Responsive ──────────────────────────────────── */
+  @media (max-width: 700px) {
+    .props-grid, .features-grid, .screenshots-grid, .security-grid { grid-template-columns: 1fr; }
+    .steps { flex-direction: column; align-items: center; }
+    .steps::before { display: none; }
+    .hero h1 { font-size: 26px; }
+    .hero-stats { gap: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════ HERO ═══════════════════════ -->
+<section class="hero" style="background:linear-gradient(135deg,#1a2332 0%,#2c3e50 55%,#34495e 100%) !important;">
+  <div class="container">
+    <div class="hero-logo">🛒</div>
+    <h1>Purchase Approval <span>Workflow</span></h1>
+    <p class="hero-sub">
+      Enterprise-grade, configurable multi-level purchase order approval
+      with 14 powerful features — built natively for Odoo 19.
+    </p>
+    <div class="badge-row">
+      <span class="badge badge-orange">Odoo 19.0</span>
+      <span class="badge badge-green">14 Features</span>
+      <span class="badge badge-blue">$99 USD</span>
+      <span class="badge badge-outline">OPL-1 License</span>
+      <span class="badge badge-outline">Purchase · Mail · HR</span>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <div class="hero-stat-num">14</div>
+        <div class="hero-stat-lbl">Features</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-num">∞</div>
+        <div class="hero-stat-lbl">Approval Levels</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-num">27</div>
+        <div class="hero-stat-lbl">Unit Tests</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-num">100%</div>
+        <div class="hero-stat-lbl">Odoo Native</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ VALUE PROPS ═══════════════════ -->
+<section style="background:#f8f9fb;">
+  <div class="container">
+    <div class="props-grid">
+      <div class="prop-card">
+        <div class="prop-icon">🎛️</div>
+        <h3>Full Control</h3>
+        <p>Configure unlimited approval levels with amount thresholds, vendor filters,
+           department routing, and urgency overrides — all without code.</p>
+      </div>
+      <div class="prop-card">
+        <div class="prop-icon">🔍</div>
+        <h3>Complete Audit Trail</h3>
+        <p>Every approval decision is immutably logged with timestamp, approver, and
+           reason. Export to Excel or PDF with one click.</p>
+      </div>
+      <div class="prop-card">
+        <div class="prop-icon">⚡</div>
+        <h3>Team Efficiency</h3>
+        <p>Approve or reject from email, delegate when out of office, bulk-approve
+           pending orders, and never miss an SLA deadline.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ FEATURES ═══════════════════════ -->
+<section>
+  <div class="container">
+    <div class="section-title">
+      <h2>14 Enterprise Features</h2>
+      <p>Every feature you need to govern procurement — nothing you don't.</p>
+      <div class="accent-line"></div>
+    </div>
+    <div class="features-grid">
+
+      <div class="feature-card">
+        <div class="feature-num">1</div>
+        <div class="feature-body">
+          <h4>SLA &amp; Automatic Escalation</h4>
+          <p>Set a deadline (hours) on each approval level. Overdue orders get a
+             red badge and are automatically escalated by a scheduled cron job.</p>
+          <span class="feature-tag">Cron · Email · Badge</span>
+        </div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-num">2</div>
+        <div class="feature-body">
+          <h4>One-Click Email Approval</h4>
+          <p>Approvers receive a notification email with <strong>Approve</strong> and
+             <strong>Reject</strong> buttons. No login required — secured with a
+             unique one-time token per order.</p>
+          <span class="feature-tag">Tokenized · Secure · No-Login</span>
+        </div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-num">3</div>
+        <div class="feature-body">
+          <h4>Bulk Approval Dashboard</h4>
+          <p>Dedicated <em>My Pending Approvals</em> and <em>All Pending</em> views
+             with summary cards, inline approve/reject, and a server action for
+             mass approval.</p>
+          <span class="feature-tag">Bulk · Dashboard · Cards</span>
+        </div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-num">4</div>
+        <div class="feature-body">
+          <h4>Delegation / Out-of-Office</h4>
+          <p>Users can delegate their approval authority to a colleague with an
+             optional expiry date. All delegated actions are flagged in the
+             audit trail.</p>
+          <span class="feature-tag">Delegate · Expiry · Audit</span>
+        </div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-num">5</div>
+        <div class="feature-body">
+          <h4>Trusted Vendor Auto-Bypass</h4>
+          <p>Mark vendors as trusted and set an amount limit. Orders below the
+             limit are auto-confirmed without any approval step, speeding up
+             low-risk procurement.</p>
+          <span class="feature-tag">Vendor · Auto-Confirm · Threshold</span>
+        </div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-num">6</div>
+        <div class="feature-body">
+          <h4>Parallel Approval (AND Logic)</h4>
+          <p>Require <em>all</em> members of an approver group to approve before
+             an order advances. Individual votes are tracked in real time with a
+             progress indicator.</p>
+          <span class="feature-tag">AND Logic · Group · Votes</span>
+        </div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-num">7</div>
+        <div class="feature-body">
+          <h4>HR Manager Auto-Routing</h4>
+          <p>Automatically route orders to the buyer's line manager as recorded
+             in the HR employee hierarchy — no manual approver assignment needed.</p>
+          <span class="feature-tag">HR · Hierarchy · Auto-Route</span>
+        </div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-num">8</div>
+        <div class="feature-body">
+          <h4>Budget Threshold Check</h4>
+          <p>The Approval Information tab shows how much budget remains under the
+             matched rule's threshold and warns the approver if the order
+             exceeds it.</p>
+          <span class="feature-tag">Budget · Warning · Real-Time</span>
+        </div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-num">9</div>
+        <div class="feature-body">
+          <h4>Approval Analytics Dashboard</h4>
+          <p>Pivot and bar/trend graph views over the full approval history.
+             Identify bottlenecks, track SLA compliance, and measure average
+             cycle times by approver or period.</p>
+          <span class="feature-tag">Analytics · Pivot · Graph</span>
+        </div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-num">10</div>
+        <div class="feature-body">
+          <h4>Change Summary on Resubmission</h4>
+          <p>When a rejected order is corrected and resubmitted, the chatter
+             automatically lists every field that changed since the last
+             rejection — vendor, amounts, products.</p>
+          <span class="feature-tag">Diff · Chatter · Resubmit</span>
+        </div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-num">11</div>
+        <div class="feature-body">
+          <h4>Approval Policy Templates</h4>
+          <p>A wizard lets administrators apply pre-built matrix configurations
+             (Low-Value Fast-Track, Three-Level Corporate, etc.) in a single
+             click.</p>
+          <span class="feature-tag">Wizard · Template · Quick-Setup</span>
+        </div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-num">12</div>
+        <div class="feature-body">
+          <h4>Vendor-Specific Rules</h4>
+          <p>Restrict a matrix rule to a specific vendor so that strategic
+             suppliers can follow a dedicated approval chain regardless of
+             order amount.</p>
+          <span class="feature-tag">Vendor Filter · Matrix · Flexible</span>
+        </div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-num">13</div>
+        <div class="feature-body">
+          <h4>Urgency Override</h4>
+          <p>Mark an order as <strong>Urgent</strong> (skip levels) or
+             <strong>Critical</strong> (route directly to the highest approver).
+             All overrides are clearly flagged in the chatter and audit trail.</p>
+          <span class="feature-tag">Urgency · Fast-Track · Critical</span>
+        </div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-num">14</div>
+        <div class="feature-body">
+          <h4>Export Audit Trail</h4>
+          <p>Download the complete approval history as a color-coded Excel
+             workbook or a branded PDF report. Filter by date range, approver,
+             decision, or specific purchase order.</p>
+          <span class="feature-tag">Excel · PDF · Filters</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ SCREENSHOTS ════════════════════ -->
+<section style="background:#f8f9fb;">
+  <div class="container">
+    <div class="section-title">
+      <h2>Screenshots</h2>
+      <p>Real screenshots from a running Odoo 19 instance.</p>
+      <div class="accent-line"></div>
+    </div>
+    <div class="screenshots-grid">
+      <div class="screenshot-item">
+        <img src="sc1_po_list.png" alt="Purchase Orders list with approval state badges"/>
+        <p class="screenshot-caption">PO list — approval state badges</p>
+      </div>
+      <div class="screenshot-item">
+        <img src="sc2_matrix_form.png" alt="Approval Matrix configuration form"/>
+        <p class="screenshot-caption">Approval Matrix — rule configuration</p>
+      </div>
+      <div class="screenshot-item">
+        <img src="sc3_matrix_list.png" alt="Approval Matrix list view"/>
+        <p class="screenshot-caption">Matrix list — all configured rules</p>
+      </div>
+      <div class="screenshot-item">
+        <img src="sc4_po_form.png" alt="Purchase Order form with approval actions"/>
+        <p class="screenshot-caption">PO form — approval actions &amp; status</p>
+      </div>
+      <div class="screenshot-item">
+        <img src="sc5_approval_tab.png" alt="Approval Information tab on PO"/>
+        <p class="screenshot-caption">Approval tab — budget check &amp; level info</p>
+      </div>
+      <div class="screenshot-item">
+        <img src="sc6_history.png" alt="Approval History list — full audit trail"/>
+        <p class="screenshot-caption">Approval History — immutable audit trail</p>
+      </div>
+      <div class="screenshot-item">
+        <img src="sc7_delegation.png" alt="User delegation fields"/>
+        <p class="screenshot-caption">User profile — delegate field &amp; expiry</p>
+      </div>
+      <div class="screenshot-item">
+        <img src="sc8_vendor_bypass.png" alt="Trusted vendor bypass settings on partner"/>
+        <p class="screenshot-caption">Vendor form — trusted bypass toggle</p>
+      </div>
+      <div class="screenshot-item">
+        <img src="sc10_chatter.png" alt="Approval chatter with structured messages"/>
+        <p class="screenshot-caption">Chatter — structured approval messages</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ HOW IT WORKS ═══════════════════ -->
+<section>
+  <div class="container">
+    <div class="section-title">
+      <h2>How It Works</h2>
+      <p>Three simple steps from purchase request to confirmed order.</p>
+      <div class="accent-line"></div>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-circle">📋</div>
+        <h4>1. Submit for Approval</h4>
+        <p>The buyer clicks <em>Submit for Approval</em>. The workflow engine
+           matches the order against the Approval Matrix and routes it to the
+           correct approver at the correct level.</p>
+      </div>
+      <div class="step">
+        <div class="step-circle">✅</div>
+        <h4>2. Approve or Reject</h4>
+        <p>The approver acts directly from Odoo or from the one-click email link.
+           Multi-level orders advance automatically to the next level on approval.</p>
+      </div>
+      <div class="step">
+        <div class="step-circle">📦</div>
+        <h4>3. Auto-Confirm</h4>
+        <p>Once all required approvals are collected, the purchase order is
+           automatically confirmed and the buyer is notified. Every step is
+           recorded in the immutable audit trail.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ SECURITY ═══════════════════════ -->
+<section style="background:#f8f9fb;">
+  <div class="container">
+    <div class="section-title">
+      <h2>Security &amp; Architecture</h2>
+      <p>Built with production security standards from day one.</p>
+      <div class="accent-line"></div>
+    </div>
+    <div class="security-grid">
+      <div class="security-card">
+        <div class="security-icon">🔑</div>
+        <h4>Role-Based Access</h4>
+        <p>Three security groups — Approval User, Approval Manager, and
+           Administrator — with fine-grained record rules. Approvers can only
+           act on orders assigned to them.</p>
+      </div>
+      <div class="security-card">
+        <div class="security-icon">🛡️</div>
+        <h4>XSS-Safe HTML</h4>
+        <p>All user-controlled data (vendor names, rejection reasons, order
+           references) is HTML-escaped before being embedded in email links or
+           chatter messages.</p>
+      </div>
+      <div class="security-card">
+        <div class="security-icon">🔒</div>
+        <h4>Secure Email Tokens</h4>
+        <p>One-click email approval links use <code>secrets.token_urlsafe(32)</code>
+           (43-character cryptographic tokens) and are validated server-side
+           before any action is taken.</p>
+      </div>
+      <div class="security-card">
+        <div class="security-icon">📜</div>
+        <h4>Immutable Audit Trail</h4>
+        <p>Approval history records are write-protected after creation —
+           even administrators cannot alter past decisions. Full timestamps
+           and approver identity are always preserved.</p>
+      </div>
+      <div class="security-card">
+        <div class="security-icon">🚫</div>
+        <h4>No Info Disclosure</h4>
+        <p>Internal exception details are logged server-side only. Public-facing
+           error pages show generic messages — no stack traces or field names
+           are ever exposed to end users.</p>
+      </div>
+      <div class="security-card">
+        <div class="security-icon">🧪</div>
+        <h4>27 Automated Tests</h4>
+        <p>Full test suite covering the approval matrix lookup, escalation
+           logic, delegation chain, trusted vendor bypass, and parallel
+           AND-vote counting.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ TECH SPECS ══════════════════════ -->
+<section>
+  <div class="container">
+    <div class="section-title">
+      <h2>Technical Specifications</h2>
+      <div class="accent-line"></div>
+    </div>
+    <table class="specs-table">
+      <tr><th>Odoo Version</th><td>19.0 (Community &amp; Enterprise)</td></tr>
+      <tr><th>Module Version</th><td>19.0.4.0.0</td></tr>
+      <tr><th>License</th><td>OPL-1 (Odoo Proprietary License) — one purchase per production database</td></tr>
+      <tr><th>Standard Dependencies</th><td><code>purchase</code>, <code>mail</code>, <code>hr</code></td></tr>
+      <tr><th>Python Dependencies</th><td><code>xlsxwriter</code> (for Excel export — install with <code>pip install xlsxwriter</code>)</td></tr>
+      <tr><th>External Services</th><td>None — fully self-contained</td></tr>
+      <tr><th>New Models</th>
+        <td>
+          <code>purchase.approval.matrix</code> ·
+          <code>purchase.approval.history</code> ·
+          <code>purchase.approval.vote</code>
+        </td>
+      </tr>
+      <tr><th>Extended Models</th>
+        <td>
+          <code>purchase.order</code> ·
+          <code>res.users</code> ·
+          <code>res.partner</code> ·
+          <code>res.config.settings</code>
+        </td>
+      </tr>
+      <tr><th>Automated Tests</th><td>27 unit tests</td></tr>
+      <tr><th>Author</th><td>Eng. Ekramy Mohamed</td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- ═══════════════════ INSTALLATION ════════════════════ -->
+<section style="background:#f8f9fb;">
+  <div class="container">
+    <div class="section-title">
+      <h2>Installation</h2>
+      <div class="accent-line"></div>
+    </div>
+    <ol style="max-width:620px;margin:0 auto;padding-left:24px;color:#444;font-size:15px;line-height:2;">
+      <li>Download and extract the module into your Odoo <code>addons</code> directory.</li>
+      <li>Install the <code>xlsxwriter</code> Python package on your server:<br/>
+          <code style="background:#f0f2f5;padding:2px 8px;border-radius:4px;font-size:13px;">pip install xlsxwriter</code></li>
+      <li>Restart the Odoo server.</li>
+      <li>In Odoo, go to <strong>Apps</strong>, remove the "Apps" filter, search for
+          <em>Purchase Approval Workflow</em>, and click <strong>Install</strong>.</li>
+      <li>Go to <strong>Purchase → Configuration → Approval Matrix</strong> and
+          create your first approval rule.</li>
+    </ol>
+    <div style="background:#fff3cd;border-left:4px solid #e67e22;border-radius:6px;padding:16px 20px;margin-top:28px;max-width:620px;margin-left:auto;margin-right:auto;">
+      <strong>Quick-start tip:</strong> Use the <em>Apply Policy Template</em> wizard
+      (Purchase → Configuration → Apply Policy Template) to load a pre-built
+      three-level matrix in one click, then customise from there.
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ CHANGELOG ═══════════════════════ -->
+<section>
+  <div class="container">
+    <div class="section-title">
+      <h2>Changelog</h2>
+      <div class="accent-line"></div>
+    </div>
+    <ul class="changelog" style="max-width:720px;margin:0 auto;">
+      <li>
+        <span class="cl-ver">v19.0.4.0.0</span>
+        <span>Feature 14 — Export Audit Trail (Excel + PDF). Diagnostic error messages
+        for amount-exceeded scenarios. XSS hardening in email controller.
+        All 14 features complete.</span>
+      </li>
+      <li>
+        <span class="cl-ver">v19.0.3.0.0</span>
+        <span>Features 9–13 — Analytics dashboard, change-summary chatter diff,
+        policy template wizard, vendor-specific rules, urgency override.</span>
+      </li>
+      <li>
+        <span class="cl-ver">v19.0.2.0.0</span>
+        <span>Features 5–8 — Trusted vendor bypass, parallel AND-logic voting,
+        HR manager auto-routing, budget threshold check.</span>
+      </li>
+      <li>
+        <span class="cl-ver">v19.0.1.0.0</span>
+        <span>Initial release — Features 1–4: SLA escalation, email approval,
+        bulk dashboard, delegation / out-of-office.</span>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<!-- ═══════════════════ SUPPORT / CTA ═══════════════════ -->
+<div style="background:#1a2332 !important;padding:56px 24px;text-align:center;">
+  <h2 style="color:#ffffff !important;font-size:26px;font-weight:700;margin:0 0 12px;font-family:'Segoe UI',Arial,sans-serif;">
+    Need Help or Have a Question?
+  </h2>
+  <p style="color:#b2bec3 !important;font-size:15px;margin:0 0 32px;font-family:'Segoe UI',Arial,sans-serif;">
+    We respond to all support requests within one business day.
+  </p>
+  <div style="display:flex;justify-content:center;gap:16px;flex-wrap:wrap;">
+    <a href="mailto:engekramy_mohamed@hotmail.com"
+       style="display:inline-block;padding:13px 30px;background:#e67e22 !important;color:#ffffff !important;
+              border-radius:6px;font-size:15px;font-weight:700;text-decoration:none;
+              font-family:'Segoe UI',Arial,sans-serif;letter-spacing:.3px;">
+      ✉&nbsp; Email Support
+    </a>
+    <a href="Purchase_Approval_Workflow_User_Guide.pdf"
+       style="display:inline-block;padding:13px 30px;background:#2c3e50 !important;color:#ffffff !important;
+              border:2px solid #4a6278;border-radius:6px;font-size:15px;font-weight:700;
+              text-decoration:none;font-family:'Segoe UI',Arial,sans-serif;letter-spacing:.3px;">
+      📄&nbsp; Download User Guide (PDF)
+    </a>
+  </div>
+</div>
+
+<!-- ═══════════════════ FOOTER ═══════════════════════════ -->
+<div style="background:#111820 !important;padding:24px;text-align:center;">
+  <p style="color:#636e72 !important;font-size:13px;margin:0;font-family:'Segoe UI',Arial,sans-serif;">
+    <strong style="color:#e67e22;">Purchase Approval Workflow</strong>
+    &nbsp;—&nbsp; v19.0.4.0.0 &nbsp;|&nbsp;
+    Developed by <strong style="color:#e67e22;">Eng. Ekramy Mohamed</strong>
+    &nbsp;|&nbsp; Licensed under <strong style="color:#e67e22;">OPL-1</strong>
+  </p>
+</div>
+
+</body>
+</html>
