@@ -30,7 +30,7 @@ Key Features:
     'website': 'https://apps.odoo.com/apps/modules/19.0/purchase_approval_workflow/',
     'support': 'engekramy_mohamed@hotmail.com',
     'license': 'OPL-1',
-    'price': 99.00,
+    'price': 49.50,
     'currency': 'USD',
     'icon': 'purchase_approval_workflow/static/description/icon.png',
     'images': ['static/description/sc1_po_list.png'],
