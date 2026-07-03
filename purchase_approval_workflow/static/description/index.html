@@ -461,50 +461,42 @@
       <p>Built with production security standards from day one.</p>
       <div class="accent-line"></div>
     </div>
-    <div class="security-grid" style="display:grid !important;grid-template-columns:repeat(3,1fr);gap:20px;">
-      <div class="security-card">
-        <div class="security-icon">🔑</div>
-        <h4>Role-Based Access</h4>
-        <p>Three security groups — Approval User, Approval Manager, and
-           Administrator — with fine-grained record rules. Approvers can only
-           act on orders assigned to them.</p>
-      </div>
-      <div class="security-card">
-        <div class="security-icon">🛡️</div>
-        <h4>XSS-Safe HTML</h4>
-        <p>All user-controlled data (vendor names, rejection reasons, order
-           references) is HTML-escaped before being embedded in email links or
-           chatter messages.</p>
-      </div>
-      <div class="security-card">
-        <div class="security-icon">🔒</div>
-        <h4>Secure Email Tokens</h4>
-        <p>One-click email approval links use <code>secrets.token_urlsafe(32)</code>
-           (43-character cryptographic tokens) and are validated server-side
-           before any action is taken.</p>
-      </div>
-      <div class="security-card">
-        <div class="security-icon">📜</div>
-        <h4>Immutable Audit Trail</h4>
-        <p>Approval history records are write-protected after creation —
-           even administrators cannot alter past decisions. Full timestamps
-           and approver identity are always preserved.</p>
-      </div>
-      <div class="security-card">
-        <div class="security-icon">🚫</div>
-        <h4>No Info Disclosure</h4>
-        <p>Internal exception details are logged server-side only. Public-facing
-           error pages show generic messages — no stack traces or field names
-           are ever exposed to end users.</p>
-      </div>
-      <div class="security-card">
-        <div class="security-icon">🧪</div>
-        <h4>27 Automated Tests</h4>
-        <p>Full test suite covering the approval matrix lookup, escalation
-           logic, delegation chain, trusted vendor bypass, and parallel
-           AND-vote counting.</p>
-      </div>
-    </div>
+    <table style="width:100%;border-collapse:separate;border-spacing:16px;table-layout:fixed;">
+      <tr style="vertical-align:top;">
+        <td style="background:#fff;border-left:4px solid #e67e22;border-radius:6px;padding:20px 18px;box-shadow:0 2px 8px rgba(0,0,0,.05);">
+          <div style="font-size:24px;margin-bottom:10px;">🔑</div>
+          <h4 style="font-size:14px;font-weight:700;color:#1a2332;margin-bottom:6px;">Role-Based Access</h4>
+          <p style="font-size:13px;color:#636e72;">Three security groups — Approval User, Approval Manager, and Administrator — with fine-grained record rules. Approvers can only act on orders assigned to them.</p>
+        </td>
+        <td style="background:#fff;border-left:4px solid #e67e22;border-radius:6px;padding:20px 18px;box-shadow:0 2px 8px rgba(0,0,0,.05);">
+          <div style="font-size:24px;margin-bottom:10px;">🛡️</div>
+          <h4 style="font-size:14px;font-weight:700;color:#1a2332;margin-bottom:6px;">XSS-Safe HTML</h4>
+          <p style="font-size:13px;color:#636e72;">All user-controlled data (vendor names, rejection reasons, order references) is HTML-escaped before embedding in email links or chatter messages.</p>
+        </td>
+        <td style="background:#fff;border-left:4px solid #e67e22;border-radius:6px;padding:20px 18px;box-shadow:0 2px 8px rgba(0,0,0,.05);">
+          <div style="font-size:24px;margin-bottom:10px;">🔒</div>
+          <h4 style="font-size:14px;font-weight:700;color:#1a2332;margin-bottom:6px;">Secure Email Tokens</h4>
+          <p style="font-size:13px;color:#636e72;">One-click email links use <code>secrets.token_urlsafe(32)</code> (43-char cryptographic tokens) validated server-side before any action is taken.</p>
+        </td>
+      </tr>
+      <tr style="vertical-align:top;">
+        <td style="background:#fff;border-left:4px solid #e67e22;border-radius:6px;padding:20px 18px;box-shadow:0 2px 8px rgba(0,0,0,.05);">
+          <div style="font-size:24px;margin-bottom:10px;">📜</div>
+          <h4 style="font-size:14px;font-weight:700;color:#1a2332;margin-bottom:6px;">Immutable Audit Trail</h4>
+          <p style="font-size:13px;color:#636e72;">History records are write-protected after creation — even administrators cannot alter past decisions. Timestamps and approver identity are always preserved.</p>
+        </td>
+        <td style="background:#fff;border-left:4px solid #e67e22;border-radius:6px;padding:20px 18px;box-shadow:0 2px 8px rgba(0,0,0,.05);">
+          <div style="font-size:24px;margin-bottom:10px;">🚫</div>
+          <h4 style="font-size:14px;font-weight:700;color:#1a2332;margin-bottom:6px;">No Info Disclosure</h4>
+          <p style="font-size:13px;color:#636e72;">Internal exception details are logged server-side only. Public-facing error pages show generic messages — no stack traces or field names ever exposed.</p>
+        </td>
+        <td style="background:#fff;border-left:4px solid #e67e22;border-radius:6px;padding:20px 18px;box-shadow:0 2px 8px rgba(0,0,0,.05);">
+          <div style="font-size:24px;margin-bottom:10px;">🧪</div>
+          <h4 style="font-size:14px;font-weight:700;color:#1a2332;margin-bottom:6px;">27 Automated Tests</h4>
+          <p style="font-size:13px;color:#636e72;">Full test suite covering matrix lookup, escalation logic, delegation chain, trusted vendor bypass, and parallel AND-vote counting.</p>
+        </td>
+      </tr>
+    </table>
   </div>
 </section>
 
@@ -602,38 +594,56 @@
 </section>
 
 <!-- ═══════════════════ SUPPORT / CTA ═══════════════════ -->
-<div style="background:#1a2332 !important;padding:56px 24px;text-align:center;">
-  <h2 style="color:#ffffff !important;font-size:26px;font-weight:700;margin:0 0 12px;font-family:'Segoe UI',Arial,sans-serif;">
-    Need Help or Have a Question?
-  </h2>
-  <p style="color:#b2bec3 !important;font-size:15px;margin:0 0 32px;font-family:'Segoe UI',Arial,sans-serif;">
-    We respond to all support requests within one business day.
-  </p>
-  <div style="display:flex;justify-content:center;gap:16px;flex-wrap:wrap;">
-    <a href="mailto:engekramy_mohamed@hotmail.com"
-       style="display:inline-block;padding:13px 30px;background:#e67e22 !important;color:#ffffff !important;
-              border-radius:6px;font-size:15px;font-weight:700;text-decoration:none;
-              font-family:'Segoe UI',Arial,sans-serif;letter-spacing:.3px;">
-      ✉&nbsp; Email Support
-    </a>
-    <a href="Purchase_Approval_Workflow_User_Guide.pdf"
-       style="display:inline-block;padding:13px 30px;background:#2c3e50 !important;color:#ffffff !important;
-              border:2px solid #4a6278;border-radius:6px;font-size:15px;font-weight:700;
-              text-decoration:none;font-family:'Segoe UI',Arial,sans-serif;letter-spacing:.3px;">
-      📄&nbsp; Download User Guide (PDF)
-    </a>
-  </div>
-</div>
+<table width="100%" cellpadding="0" cellspacing="0" bgcolor="#1a2332">
+  <tr>
+    <td align="center" style="padding:52px 24px;">
+      <h2 style="color:#ffffff;font-size:26px;font-weight:700;margin:0 0 10px;font-family:Arial,sans-serif;">Need Help or Have a Question?</h2>
+      <p style="color:#b2bec3;font-size:15px;margin:0 0 28px;font-family:Arial,sans-serif;">We respond to all support requests within one business day.</p>
+      <table cellpadding="0" cellspacing="0" style="margin:0 auto;">
+        <tr>
+          <td style="padding:0 8px;">
+            <table cellpadding="0" cellspacing="0">
+              <tr>
+                <td bgcolor="#e67e22" style="border-radius:6px;padding:13px 28px;">
+                  <a href="mailto:engekramy_mohamed@hotmail.com"
+                     style="color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;font-family:Arial,sans-serif;white-space:nowrap;">
+                    ✉ Email Support
+                  </a>
+                </td>
+              </tr>
+            </table>
+          </td>
+          <td style="padding:0 8px;">
+            <table cellpadding="0" cellspacing="0">
+              <tr>
+                <td bgcolor="#2c3e50" style="border-radius:6px;padding:13px 28px;border:2px solid #4a6278;">
+                  <a href="Purchase_Approval_Workflow_User_Guide.pdf"
+                     style="color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;font-family:Arial,sans-serif;white-space:nowrap;">
+                    📄 Download User Guide (PDF)
+                  </a>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
 
 <!-- ═══════════════════ FOOTER ═══════════════════════════ -->
-<div style="background:#111820 !important;padding:24px;text-align:center;">
-  <p style="color:#636e72 !important;font-size:13px;margin:0;font-family:'Segoe UI',Arial,sans-serif;">
-    <strong style="color:#e67e22;">Purchase Approval Workflow</strong>
-    &nbsp;—&nbsp; v19.0.4.0.0 &nbsp;|&nbsp;
-    Developed by <strong style="color:#e67e22;">Eng. Ekramy Mohamed</strong>
-    &nbsp;|&nbsp; Licensed under <strong style="color:#e67e22;">OPL-1</strong>
-  </p>
-</div>
+<table width="100%" cellpadding="0" cellspacing="0" bgcolor="#111820">
+  <tr>
+    <td align="center" style="padding:20px;">
+      <p style="color:#888888;font-size:13px;margin:0;font-family:Arial,sans-serif;">
+        <strong style="color:#e67e22;">Purchase Approval Workflow</strong>
+        &nbsp;—&nbsp; v19.0.4.0.0 &nbsp;|&nbsp;
+        Developed by <strong style="color:#e67e22;">Eng. Ekramy Mohamed</strong>
+        &nbsp;|&nbsp; Licensed under <strong style="color:#e67e22;">OPL-1</strong>
+      </p>
+    </td>
+  </tr>
+</table>
 
 </body>
 </html>
